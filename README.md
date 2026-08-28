@@ -2,6 +2,8 @@
 
 A docker-based container for re-centering an MRI brain volume by applying pure voxel shifts.
 
+Extension: map to MNI305 as an alternative - requires to resample the original data.
+
 ## What it does
 
 - Reads an input NIfTI image in .nii or .nii.gz format

@@ -14,6 +14,8 @@ WORKDIR /app
 
 RUN cd /app && python3 -m venv .venv && \
     . /app/.venv/bin/activate && \
+    chmod +x /app/entrypoint.sh && \
+    chmod +x /app/recenter_brain.py && \
     echo "source /app/.venv/bin/activate" >> ~/.bashrc && \
     apt-get update && apt-get install -yq swig cmake git build-essential python-dev-is-python3 bison && \
     git clone https://github.com/SimpleITK/SimpleITK.git && \
@@ -30,5 +32,7 @@ RUN cd /app && python3 -m venv .venv && \
 RUN curl -Ls https://fsl.fmrib.ox.ac.uk/fsldownloads/fslconda/releases/getfsl.sh | sh -s
 RUN echo "source /opt/fsl/etc/fslconf/fsl.sh" >> ~/.bashrc
 
+# Use the script as the entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
 
-ENTRYPOINT ["python", "/app/recenter_brain.py"]
+#CMD ["/app/recenter_brain.py"]

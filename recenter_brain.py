@@ -57,7 +57,12 @@ def main() -> None:
 
     input_path = Path(args.input).resolve()
     output_path = Path(args.output).resolve()
-    output_path2 = Path(args.output).resolve().parent / (Path(args.output).stem + "_reg2mni305.nii.gz")
+    extensions = output_path.suffixes   # either [".nii", ".gz"] or [".mgz"]
+    output_path_no_ext = output_path
+    for word in extensions:
+        output_path_no_ext = output_path_no_ext.replace(word, "")
+
+    output_path2 = Path(args.output).resolve().parent / (output_path_no_ext + "_reg2mni305.nii.gz")
 
     if not input_path.exists():
         raise SystemExit(f"Input file does not exist: {input_path}")
@@ -133,9 +138,15 @@ def main() -> None:
         try:
             elastixImageFilter.Execute()
             resultImage = elastixImageFilter.GetResultImage()
+            # always .nii.gz
             sitk.WriteImage(resultImage, str(output_path2))
         except:
             print(f"Error occurred while processing {brain_path}")
+        if extensions[0] == ".mgz":
+            # convert .nii.gz file to mgz
+            print("convert reg2mni to output format")
+            im = nib.load(str(output_path2))
+            nib.save(im, str(output_path))
 
     print(f"[center-brain] Wrote re-centered image to {output_path2}")
 
