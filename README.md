@@ -4,6 +4,8 @@ A docker-based container for re-centering an MRI brain volume by applying pure v
 
 Extension: map to MNI305 as an alternative - requires to resample the original data.
 
+![Idea](https://github.com/HaukeBartsch/centerbrain/blob/idea.png)
+
 ## What it does
 
 - Reads an input NIfTI image in .nii or .nii.gz format
