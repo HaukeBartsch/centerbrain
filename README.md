@@ -39,6 +39,7 @@ docker run -it --rm -v `pwd`/data:/data centerbrain /data/head.mgz /data/head_ce
 ## Notes
 
 - The container expects a 3D image that can be loaded by nibabel.
-- The output is created by shifting voxels and preserving the original image grid.
+- The output (output 1) is created by shifting voxels and preserving the original image grid. This 'soft' approach keeps all image information as-is, no degradation of image quality due to resampling.
+- The _reg2mni305.* output (output 2) includes a rigid (translation and rotation) to MNI space. This 'hard' approach resamples the image intensities.
 - For best results, use a brain MRI with good contrast and sufficient coverage.
 
