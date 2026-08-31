@@ -63,7 +63,7 @@ def main() -> None:
     exts_out = output_path.suffixes   # either [".nii", ".gz"] or [".nii"] or [".mgz"]
     exts_in = input_path.suffixes     # either [".nii", ".gz"] or [".nii"] or [".mgz"]
     if len(exts_out) == 0:
-        raise SystemExit("Provide an extension for the output filename")
+        raise SystemExit("[center-brain] Provide an extension for the output filename")
 
     # What is working is using the input as .nii.gz (or .nii) and the output as .nii.gz as well.
     # So convert first either of them to tmp and undo at the end of the script.
@@ -74,7 +74,7 @@ def main() -> None:
     output_path2 = Path(args.output).resolve().parent / Path(output_path_no_ext + "_reg2mni305.nii.gz")
 
     if not input_path.is_file():
-        raise SystemExit(f"Input is not a file: {input_path}")
+        raise SystemExit(f"[center-brain] Input is not a file: {input_path}")
 
     # now do something like this to the input if its .mgz
     if ".nii" not in exts_in:
@@ -83,14 +83,14 @@ def main() -> None:
         # create a .nii.gz version of the .mgz input
         input_path2 = Path(args.output).resolve().parent / Path(Path(input_path).name).with_suffix(".nii.gz")
         nib.save(im, str(input_path2))
-        print(f"Continue to work with a .nii.gz version ({input_path2}) of the input {input_path}")
+        print(f"[center-brain] Continue to work with a .nii.gz version ({input_path2}) of the input {input_path}")
         input_path = input_path2
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     img = nib.load(str(input_path))
     if img.ndim != 3:
-        raise SystemExit("Only 3D NIfTI images are supported")
+        raise SystemExit("[center-brain] Only 3D NIfTI images are supported")
 
     with tempfile.TemporaryDirectory(prefix="center-brain-", dir="/tmp", delete=False) as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -136,7 +136,7 @@ def main() -> None:
         atlas_path = Path(__file__).parent / "mni305.cor.nii.gz"
         mnimask_path = Path(__file__).parent / "mni305_head_bet.nii.gz"
         if not atlas_path.exists():
-            raise SystemExit(f"Atlas file not found: {atlas_path}")
+            raise SystemExit(f"[center-brain] Atlas file not found: {atlas_path}")
         atlas = sitk.ReadImage(str(atlas_path), sitk.sitkFloat32)
         if Path(output_path).suffix == ".mgz":
             # load the file here as .nii.gz
@@ -169,15 +169,15 @@ def main() -> None:
             # always .nii.gz
             sitk.WriteImage(resultImage, str(output_path2))
         except:
-            print(f"Error occurred while processing {brain_path}")
+            print(f"[center-brain] Error occurred while processing {brain_path}")
         if exts_out[0] == ".mgz":
             # convert .nii.gz file to mgz
-            print("convert reg2mni to output format")
+            print(f"[center-brain] Wrote re-centered image to {output_path}")
             # it should always be a .nii.gz due to conversion earlier
             im = nib.load(str(output_path2))
             nib.save(im, str(output_path))
-
-    print(f"[center-brain] Wrote re-centered image to {output_path2}")
+        else:
+            print(f"[center-brain] Wrote re-centered image to {output_path2}")
 
 
 if __name__ == "__main__":
