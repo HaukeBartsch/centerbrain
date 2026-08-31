@@ -24,8 +24,8 @@ docker build -t centerbrain -f Dockerfile .
 ## Run the container
 
 ```bash
-docker run --rm \
-  -v "$PWD:/data" \
+docker run --rm -it \
+  -v `pwd`/data:/data \
   centerbrain /data/head.nii.gz /data/head_centered.nii.gz
 ```
 

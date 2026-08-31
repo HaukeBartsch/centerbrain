@@ -46,26 +46,45 @@ def shift_array_with_zero_padding(data: np.ndarray, shifts: np.ndarray) -> np.nd
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Re-center a 3D MRI brain using HD-BET and voxel shifts")
-    parser.add_argument("input", help="Input NIfTI image (.nii or .nii.gz)")
-    parser.add_argument("output", help="Output NIfTI image (.nii or .nii.gz)")
+    parser = argparse.ArgumentParser(description="Re-center a 3D MRI brain using HD-BET and voxel shifts plus reg against mni305")
+    parser.add_argument("input", help="Input NIfTI image (.nii or .nii.gz, or .mgz)")
+    parser.add_argument("output", help="Output NIfTI image (.nii or .nii.gz, or .mgz)")
     args = parser.parse_args()
 
     ensure_dependency("hd-bet")
     ensure_dependency("fslmaths")
     ensure_dependency("fslstats")
 
+    # There are two different libraries reading the input and output formats (sitk and nibabel).
+    # Only nibabel can work with .mgz files (as output format). The registration using sitk does
+    # not seem to be able to write .mgz files.
     input_path = Path(args.input).resolve()
     output_path = Path(args.output).resolve()
-    extensions = output_path.suffixes   # either [".nii", ".gz"] or [".mgz"]
-    output_path_no_ext = output_path
-    for word in extensions:
+    exts_out = output_path.suffixes   # either [".nii", ".gz"] or [".nii"] or [".mgz"]
+    exts_in = input_path.suffixes     # either [".nii", ".gz"] or [".nii"] or [".mgz"]
+    if len(exts_out) == 0:
+        raise SystemExit("Provide an extension for the output filename")
+
+    # What is working is using the input as .nii.gz (or .nii) and the output as .nii.gz as well.
+    # So convert first either of them to tmp and undo at the end of the script.
+    output_path_no_ext = str(output_path)
+    for word in exts_out:
         output_path_no_ext = output_path_no_ext.replace(word, "")
 
-    output_path2 = Path(args.output).resolve().parent / (output_path_no_ext + "_reg2mni305.nii.gz")
+    output_path2 = Path(args.output).resolve().parent / Path(output_path_no_ext + "_reg2mni305.nii.gz")
 
-    if not input_path.exists():
-        raise SystemExit(f"Input file does not exist: {input_path}")
+    if not input_path.is_file():
+        raise SystemExit(f"Input is not a file: {input_path}")
+
+    # now do something like this to the input if its .mgz
+    if ".nii" not in exts_in:
+        # convert to .nii.gz first and use that instead
+        im = nib.load(str(input_path))
+        # create a .nii.gz version of the .mgz input
+        input_path2 = Path(args.output).resolve().parent / Path(Path(input_path).name).with_suffix(".nii.gz")
+        nib.save(im, str(input_path2))
+        print(f"Continue to work with a .nii.gz version ({input_path2}) of the input {input_path}")
+        input_path = input_path2
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -107,6 +126,9 @@ def main() -> None:
 
         new_img = nib.Nifti1Image(shifted_data, img.affine, header=img.header.copy())
         nib.save(new_img, str(output_path))
+        if Path(output_path).suffix == ".mgz":
+            # save as .nii as well
+            nib.save(new_img, str(Path(output_path).with_suffix(".nii.gz")))
 
         # Use the brain and its brain mask to run a final registration (rigid) against mni305.cor.nii.gz
         # This dataset comes from freesurfer which in turn creates it as mgz from the MINC dataset 
@@ -116,7 +138,13 @@ def main() -> None:
         if not atlas_path.exists():
             raise SystemExit(f"Atlas file not found: {atlas_path}")
         atlas = sitk.ReadImage(str(atlas_path), sitk.sitkFloat32)
-        moving = sitk.ReadImage(str(output_path), sitk.sitkFloat32)
+        if Path(output_path).suffix == ".mgz":
+            # load the file here as .nii.gz
+            # we need that version for 
+            moving = sitk.ReadImage(str(Path(output_path).with_suffix(".nii.gz")), sitk.sitkFloat32)
+        else:
+            # load the file as .nii
+            moving = sitk.ReadImage(str(output_path), sitk.sitkFloat32)
 
         # Use SimpleITK for registration
         elastixImageFilter = sitk.ElastixImageFilter()
@@ -142,9 +170,10 @@ def main() -> None:
             sitk.WriteImage(resultImage, str(output_path2))
         except:
             print(f"Error occurred while processing {brain_path}")
-        if extensions[0] == ".mgz":
+        if exts_out[0] == ".mgz":
             # convert .nii.gz file to mgz
             print("convert reg2mni to output format")
+            # it should always be a .nii.gz due to conversion earlier
             im = nib.load(str(output_path2))
             nib.save(im, str(output_path))
 
