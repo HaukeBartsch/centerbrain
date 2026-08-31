@@ -1,7 +1,7 @@
 FROM neurodebian:latest
 
 #
-# docker buildx build --platform linux/amd64,linux/arm64 -t centerbrain -f Dockerfile .
+# docker buildx build --platform linux/amd64,linux/arm64 -t centerbrain -f Dockerfile --load .
 #
 
 ENV DEBIAN_FRONTEND=noninteractive \
