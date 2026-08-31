@@ -36,7 +36,7 @@ or
 docker run -it --rm -v `pwd`/data:/data centerbrain /data/head.mgz /data/head_centered.mgz
 ```
 
-The above commands will create a `pwd`/data/head_centered.mgz and a `pwd`/data/head_centered_reg2mni305.mgz volume.
+The above commands will create a `data/head_centered.mgz` and a `data/head_centered_reg2mni305.mgz` volume.
 
 ## Notes
 
