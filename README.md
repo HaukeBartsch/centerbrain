@@ -4,7 +4,7 @@ A docker-based container for re-centering an MRI brain volume by applying pure v
 
 Extension: map to MNI305 as an alternative - requires to resample the original data.
 
-![Idea](https://github.com/HaukeBartsch/centerbrain/blob/idea.png)
+![Idea](https://github.com/HaukeBartsch/centerbrain/blob/main/idea.png)
 
 ## What it does
 
