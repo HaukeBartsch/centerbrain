@@ -8,7 +8,7 @@ The resampled version is mapped to atlas MNI305.
 
 ## What it does
 
-- Reads an input NIfTI image in .nii, .nii.gz or .mgz format
+- Reads an input image in .nii, .nii.gz or .mgz format
 - Uses HD-BET to detect and extract the brain (and mask)
 - Computes the brain's center of mass in x, y, and z
 - Shifts the original image so the brain is also centered inside the field of view (no resampling), result is saved as output volume.
