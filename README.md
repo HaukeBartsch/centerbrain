@@ -5,6 +5,7 @@ A docker-based container for re-centering an MRI brain volume by applying pure v
 The resampled version is mapped to atlas MNI305.
 
 ![Idea](https://github.com/HaukeBartsch/centerbrain/blob/main/idea.png)
+Fig.: Sketch on the left represents a sagittal view of an MRI volume - the brain is not centered in the field of view and rotated upwards (arrow). Sketch on the right represents the same sagittal view after centering by adding and removing slices (output 1) and after an additional registration to the MNI-305 space (output 2).
 
 ## What it does
 
