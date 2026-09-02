@@ -2,7 +2,9 @@
 
 A docker-based container for re-centering an MRI brain volume by applying pure voxel shifts - and resampling.
 
-**Issue addressed**: MMPS and FreeSurfer might have issues with T1-weighted MR images that have too much neck as part of the acquisition. If such processing fails this tool can re-center the brain (adding and removing as needed). Restarting MMPS / FreeSurfer might work now for these previously failed processing runs.
+**Issue addressed**: MMPS and FreeSurfer might have issues with T1-weighted MR images that have too much neck as part of the acquisition. If such processing fails this tool can re-center the brain (adding and removing slices as needed in x, z, or z). Restart MMPS / FreeSurfer on the shifted version. If this fails as well restart on the version mapped to MNI space.
+
+The shifted version centers the brain mask into the center of the volume.
 
 The resampled version is mapped to atlas MNI305.
 
